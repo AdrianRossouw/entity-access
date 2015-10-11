@@ -15,5 +15,12 @@
   "bugs": {
     "url": "https://github.com/AdrianRossouw/entity-access/issues"
   },
-  "homepage": "https://github.com/AdrianRossouw/entity-access#readme"
+  "homepage": "https://github.com/AdrianRossouw/entity-access#readme",
+  "dependencies": {
+    "knex": "^0.8.6",
+    "lodash": "^3.10.1"
+  },
+  "devDependencies": {
+    "sqlite3": "^3.1.0"
+  }
 }
