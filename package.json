@@ -1,0 +1,19 @@
+{
+  "name": "entity-access",
+  "version": "0.0.1",
+  "description": "content-level access control using knex",
+  "main": "entity-access.js",
+  "scripts": {
+    "test": "mocha *.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdrianRossouw/entity-access.git"
+  },
+  "author": "Adrian Rossouw",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AdrianRossouw/entity-access/issues"
+  },
+  "homepage": "https://github.com/AdrianRossouw/entity-access#readme"
+}
