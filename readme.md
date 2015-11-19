@@ -13,7 +13,7 @@ be loaded into a [seneca-knex-store](https://github.com/AdrianRossouw/seneca-kne
 
 Whenever the entity is modified, entity-access will allow you to provide a set of __locks__ that would provide access to the content. These locks will also be persisted in the database by tapping into the entity's 'update' and 'insert' queries.
 
-Whenever an entity is fetched from the database, the system will allow you to generate a _keychain_ for the user requesting the entities. This is a list of keys that the user provides, that will be used to open the entity's locks.
+Whenever an entity is fetched from the database, the system will allow you to generate a __keychain__ for the user requesting the entities. This is a list of keys that the user provides, that will be used to open the entity's locks.
 
 This keychain can then used to construct a __query__ that will be used to append an additional check on `list` and `load` queries to filter the results.
 
