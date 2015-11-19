@@ -5,9 +5,31 @@ in a relational database. It is built in such a way that you can easily filter
 out records that a user does not have access to on a query level, before
 the rest of your system even sees the data.
 
-There are 3 main components to how this works :
+### How it works
 
-* __locks__: each entity can declare one or more locks that need to be opened.
+An __entity__ is an object containing functions that return an instance of a [Knex.js](http://knexjs.org) query builder for each of the following basic crud
+operations: `insert`, `update`, `list`, `load` and `remove`. This object can also
+be loaded into a [seneca-knex-store](https://github.com/AdrianRossouw/seneca-knex-store), but this is not a requirement.
+
+Whenever the entity is modified, entity-access will allow you to provide a set of __locks__ that would provide access to the content. These locks will also be persisted in the database by tapping into the entity's 'update' and 'insert' queries.
+
+Whenever an entity is fetched from the database, the system will allow you to generate a _keychain_ for the user requesting the entities. This is a list of keys that the user provides, that will be used to open the entity's locks.
+
+This keychain can then used to construct a __query__ that will be used to append an additional check on `list` and `load` queries to filter the results.
+
+The resulting query should look something like :
+
+```sql
+SELECT * FROM entity
+    WHERE id IN (SELECT entity_id FROM acl AS lock
+        WHERE lock='lock' AND key IN (:keychain));
+```
+
+## Terminology
+
+* __entity__: object with `insert`, `update`, `load`, `list`, and `remove` knex queries.
+* __acl__: object with functions providing the `locks`, `keychain` and `query`.
+* __locks__: each entity can declare one or more locks that need to be opened by one or more keys.
 * __keychain__: each user has one or keys with which to open locks.
 * __query__: The order and combination in which the locks need to open to provide access.
 
@@ -16,7 +38,7 @@ There are 3 main components to how this works :
 If we decode the unix file permission structure in this way :
 
 * Each file has a `user lock`, a `group lock`, and an `others lock` (with read/write/execute bits).
-* Each user has a `user key`, `group keys` for all it's groups, and an implicit `others key`.
+* Each user has a `user key`, `group keys` for all it's groups, and an implicit `others key` in it's keychain.
 * To gain access for the specific operation, the user has to have a key to unlock __any__ of the file's locks.
 
 The rest of the code in this readme will document how to implement unix permissions.
@@ -69,6 +91,8 @@ will automatically use this new ACL.
 var store = require('seneca-knex-store');
 seneca.use(store('-/-/file', aclQueries));
 ```
+
+## Implementing your own ACL.
 
 ### Locks
 
