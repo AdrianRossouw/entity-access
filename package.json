@@ -4,7 +4,8 @@
   "description": "content-level access control using knex",
   "main": "entity-access.js",
   "scripts": {
-    "test": "mocha *.test.js"
+    "test": "./node_modules/.bin/lab -v *.test.js",
+    "lint": "./node_modules/.bin/lab *.test.js -d"
   },
   "repository": {
     "type": "git",
@@ -17,10 +18,18 @@
   },
   "homepage": "https://github.com/AdrianRossouw/entity-access#readme",
   "dependencies": {
+    "bluebird": "^2.9.24",
     "knex": "^0.8.6",
     "lodash": "^3.10.1"
   },
   "devDependencies": {
-    "sqlite3": "^3.1.0"
+    "eslint-config-seneca": "1.x.x",
+    "eslint-plugin-hapi": "2.x.x",
+    "eslint-plugin-standard": "1.x.x",
+    "lab": "6.x.x",
+    "node-uuid": "^1.4.7",
+    "sqlite3": "^3.1.0",
+    "tmp": "0.0.28",
+    "uuid": "^2.0.1"
   }
 }
