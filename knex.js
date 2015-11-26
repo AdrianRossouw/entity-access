@@ -37,7 +37,9 @@ module.exports = function(db) {
 
     logic({ and: and,  or: or, not: not });
 
-    return knex;
+    return function() {
+      return knex;
+    }
     
 
     function processCondition(onCondition, onNest) {
@@ -63,21 +65,21 @@ module.exports = function(db) {
     function and() {
       return processCondition(
         function(cnd) {  this.whereIn(cnd + '.key', opts.keychain); },
-        function(cnd) {  this.where(cnd); }
+        function(cnd) { console.log(cnd);  this.where(function() { cnd.apply(this, arguments) }); }
       ).apply(this, arguments);
     }
 
     function or() {
       return processCondition(
           function(cnd) {  this.orWhereIn(cnd + '.key', opts.keychain); },
-          function(cnd) {  this.orWhere(cnd); }
+          function(cnd) {  console.log(cnd); this.orWhere(function() { cnd.apply(this, arguments); }) }
       ).apply(this, arguments);
     }
 
     function not() {
       return processCondition(
           function(cnd) {  this.whereNotIn(cnd + '.key', opts.keychain); },
-          function(cnd) {  this.whereNot(cnd); }
+          function(cnd) {  console.log(cnd); this.whereNot(function() { cnd.apply(this, arguments); }); }
       ).apply(knex, arguments);
     }
 
