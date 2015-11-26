@@ -8,40 +8,41 @@ var opts = {
   entity: 'blog',
   keychain: ['user=test-user']
 }
-  
+
 describe('simple conditionals', function() {
   it('and locks', function() {
-    var logic = function(lgc) { return lgc.and('user', 'role'); }
-    var result = _clean(toSql(logic, ['user', 'role'], opts));
+    var result = toSql(opts, function(xpr) {
+      return xpr.and('user', 'role');
+    })();
 
-    assert.equal(result, 'user and role');
-  })
+    assert.equal(_clean(result), 'user and role');
+  });
 
   it('or locks', function() {
-    var logic = function(lgc) { return lgc.or('user', 'role'); }
-    var result = _clean(toSql(logic, ['user', 'role'], opts));
+    var result = toSql(opts, function(xpr) {
+      return xpr.or('user', 'role');
+    })();
 
-    assert.equal(result, 'user or role');
+    assert.equal(_clean(result), 'user or role');
   })
 
   it('not locks', function() {
-    var logic = function(lgc) { return lgc.not('user', 'role'); }
-    var result = _clean(toSql(logic, ['user', 'role'], opts));
+    var result = toSql(opts, function(xpr) {
+      return xpr.not('user', 'role');
+    })();
 
-    assert.equal(result, 'not user and not role');
+    assert.equal(_clean(result), 'not user and not role');
   })
 });
 
 describe('nested conditions', function() {
 
   it('and nested in or', function() {
-    var logic = function(lgc) {
-      return lgc.or('draft', lgc.and('user', 'role'));
-    }
-    var result = _clean(toSql(logic, ['draft', 'user', 'role'], opts));
-    console.log(result);
+    var result = toSql(opts, function(xpr) {
+      return xpr.or('draft', xpr.and('user', 'role'));
+    })();
 
-    assert.equal(result, 'draft or (user and role)');
+    assert.equal(_clean(result), 'draft or (user and role)');
   })
 
 });

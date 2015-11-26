@@ -1,7 +1,7 @@
 var _ = require('lodash');
 
 module.exports = function(db) {
-  var eaKnex = require('entity-access-knex')(db);
+  var toKnex = require('../knex')(db);
 
   function locks(entity, done) {
     var locks = [];
@@ -26,13 +26,12 @@ module.exports = function(db) {
     done(null, keys);
   }
 
-  function list(acl) {
-    acl.locks(['owner', 'role']);
-    return acl.or('owner', 'role');
+  function list(xpr) {
+    return xpr.or('owner', 'role');
   },
 
   function query(opts, done) {
-    done(null, eaKnex(list, opts));
+    done(null, toKnex(opts, list)());
   }
 
   return {
