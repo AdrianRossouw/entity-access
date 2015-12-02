@@ -1,6 +1,5 @@
 var _ = require('lodash');
 
-
 module.exports = function(opts, fn) {
   var acl = opts.acl;
 
@@ -23,7 +22,10 @@ module.exports = function(opts, fn) {
     }
 
     function not() {
-      return _.partial(_.negate, _.partial(_.all, arguments, _matchFn));
+      var args = arguments;
+      return function() {
+        return !_.all(args, _matchFn);
+      };
     }
 
     return { and: and,  or: or, not: not };
