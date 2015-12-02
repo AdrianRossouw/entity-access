@@ -9,11 +9,42 @@ module.exports = function (db) {
     assert.ok(entity, 'entity required');
     key = key || 'id';
 
+    var _acl = _.extend({}, acl, {
+      locks: function(ent, done) {
+        var entityId = ent.id;
+
+        acl.locks(ent, function(locks) {
+          done(null, _processLocks(locks));
+        });
+
+        function _setDefaults(lock) {
+          return _.defaults(lock, {
+            entityId: entityId,
+            entity: entity,
+            read: false,
+            write: false,
+            remove: false
+          });
+        }
+
+        function _filterAllowed(lock) {
+          return (lock.key && lock.lock && (lock.read || lock.write || lock.remove));
+        }
+
+        function _processLocks(locks) {
+          return _(locks)
+            .map(_setDefaults)
+            .filter(_filterAllowed)
+            .value();
+        }
+      }
+    });
+
     // convert async functions to promises
     var promised = {
-      locks: Promise.promisify(acl.locks),
-      keychain: Promise.promisify(acl.keychain),
-      query: Promise.promisify(acl.query)
+      locks: Promise.promisify(_acl.locks),
+      keychain: Promise.promisify(_acl.keychain),
+      query: Promise.promisify(_acl.query)
     };
 
     function setPermissionWhere(knex, access, opts) {
@@ -46,32 +77,11 @@ module.exports = function (db) {
         if (key !== 'id') { return rows; }
 
         return promised.locks(opts.ent)
-            .then(_processLocks)
           .then(_removeLocks)
           .each(q.insert)
           .thenReturn(rows);
       };
 
-      function _setDefaults(lock) {
-        return _.defaults(lock, {
-          entityId: entityId,
-          entity: entity,
-          read: false,
-          write: false,
-          remove: false
-        });
-      }
-
-      function _filterAllowed(lock) {
-        return (lock.key && lock.lock &&
-          (lock.read || lock.write || lock.remove));
-      }
-
-      function _processLocks(locks) {
-        return _(locks).map(_setDefaults)
-          .filter(_filterAllowed)
-          .value();
-      }
 
       function _removeLocks(locks) {
         var args = { entityId: entityId, entity: entity  };
@@ -94,7 +104,7 @@ module.exports = function (db) {
       update: function (opts) {
         return queries.update(opts).then(regenerateLocks(opts));
       },
-      acl: acl
+      acl: _acl
     });
   };
 };

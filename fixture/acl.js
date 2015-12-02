@@ -1,7 +1,7 @@
 var _ = require('lodash');
 
 module.exports = function(db) {
-  var toKnex = require('../knex')(db);
+  var toKnex = require('../logic/knex')(db);
 
   function locks(entity, done) {
     var locks = [];
