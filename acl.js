@@ -11,32 +11,22 @@ module.exports = function (db) {
 
     var _acl = _.extend({}, acl, {
       locks: function(ent, done) {
-        var entityId = ent.id;
+        var defaults = {
+          entityId: ent.id,
+          entity: entity,
+          read: false,
+          write: false,
+          remove: false
+        };
 
         acl.locks(ent, function(err, locks) {
-          done(null, _processLocks(locks));
-        });
-
-        function _setDefaults(lock) {
-          return _.defaults(lock, {
-            entityId: entityId,
-            entity: entity,
-            read: false,
-            write: false,
-            remove: false
-          });
-        }
-
-        function _filterAllowed(lock) {
-          return (lock.key && lock.lock && (lock.read || lock.write || lock.remove));
-        }
-
-        function _processLocks(locks) {
-          return _(locks)
-            .map(_setDefaults)
+          var _locks = _(locks)
+            .map(_.partial(_.defaults, _, defaults))
             .filter(_filterAllowed)
             .value();
-        }
+
+          done(null, _locks);
+        });
       }
     });
 
@@ -108,3 +98,7 @@ module.exports = function (db) {
     });
   };
 };
+
+function _filterAllowed(lock) {
+  return (lock.key && lock.lock && (lock.read || lock.write || lock.remove));
+}
