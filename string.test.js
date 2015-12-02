@@ -7,7 +7,6 @@ var opts = {
   keychain: ['user=test-user']
 }
 
-
 describe('simple conditionals', function() {
   it('and locks', function() {
     var result = toString(opts, function(xpr) {

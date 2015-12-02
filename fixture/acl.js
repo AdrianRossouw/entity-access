@@ -28,7 +28,7 @@ module.exports = function(db) {
 
   function list(xpr) {
     return xpr.or('owner', 'role');
-  },
+  }
 
   function query(opts, done) {
     done(null, toKnex(opts, list)());
