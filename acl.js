@@ -13,7 +13,7 @@ module.exports = function (db) {
       locks: function(ent, done) {
         var entityId = ent.id;
 
-        acl.locks(ent, function(locks) {
+        acl.locks(ent, function(err, locks) {
           done(null, _processLocks(locks));
         });
 
