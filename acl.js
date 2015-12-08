@@ -9,21 +9,24 @@ module.exports = function(acl, entity, key) {
 
   var _acl = _.extend({}, acl, {
     locks: function(ent, done) {
-      var defaults = {
-        entityId: ent.id,
-        entity: entity,
-        read: false,
-        write: false,
-        remove: false
-      };
 
       acl.locks(ent, function(err, locks) {
         var _locks = _(locks)
-          .map(_.partial(_.defaults, _, defaults))
+          .map(_defaults)
           .filter(_filterAllowed)
           .value();
 
         done(null, _locks);
+
+        function _defaults(lock) {
+          return _.defaults({}, lock, {
+            entityId: ent.id,
+            entity: entity,
+            read: false,
+            write: false,
+            remove: false
+          });
+        }
       });
     }
   });
