@@ -25,10 +25,20 @@ var fixture = {
 var acl = ACL(fixture, 'test', 'id');
 
 describe('ACL api', function() {
-  it('expands locks as needed', function(done) {
+  var include;
+  before(function(done) {
     acl.locks({ id: 1 }, function(err, keys) {
-      console.log(keys);
+      assert.equal(keys.length, 1);
+      include = _.partial(_.find, keys);
       done();
     });
+  });
+
+  it('expands locks as needed', function(done) {
+    assert.ok(include({ entityId: 1 }), 'added entityId');
+    assert.ok(include({ write: false }), 'default write to false');
+    assert.ok(include({ remove: false }), 'default remove to false');
+    assert.ok(include({ entity: 'test' }), 'default entity type');
+    done();
   });
 });

@@ -43,7 +43,7 @@ var entityData = {
   }
 };
 
-describe('acl query tests', function() {
+describe('acl knex integration', function() {
   before(queries.setup);
   before(fixture.queries.setup);
   after(fixture.queries.breakdown);
