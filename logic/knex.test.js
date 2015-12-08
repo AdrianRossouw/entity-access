@@ -1,3 +1,11 @@
+var Lab = require('lab')
+
+var lab = exports.lab = Lab.script()
+var describe = lab.describe
+var it = lab.it
+var before = lab.before;
+var after = lab.after;
+
 var db = require('knex')({ client: 'postgresql' });
 
 var assert = require('assert');
@@ -9,42 +17,48 @@ var opts = {
   keychain: ['user=test-user']
 }
 
-describe('simple conditionals', function() {
-  it('and locks', function() {
-    var result = toSql(opts, function(xpr) {
-      return xpr.and('user', 'role');
-    })();
+describe('acl.toKnex logic implementation', function() {
+  describe('simple conditionals', function() {
+    it('and locks', function(done) {
+      var result = toSql(opts, function(xpr) {
+        return xpr.and('user', 'role');
+      })();
 
-    assert.equal(_clean(result), 'user and role');
+      assert.equal(_clean(result), 'user and role');
+      done();
+    });
+
+    it('or locks', function(done) {
+      var result = toSql(opts, function(xpr) {
+        return xpr.or('user', 'role');
+      })();
+
+      assert.equal(_clean(result), 'user or role');
+      done();
+    })
+
+    it('not locks', function(done) {
+      var result = toSql(opts, function(xpr) {
+        return xpr.not('user', 'role');
+      })();
+
+      assert.equal(_clean(result), 'not user and not role');
+      done();
+    })
   });
 
-  it('or locks', function() {
-    var result = toSql(opts, function(xpr) {
-      return xpr.or('user', 'role');
-    })();
+  describe('nested conditions', function() {
 
-    assert.equal(_clean(result), 'user or role');
-  })
+    it('and nested in or', function(done) {
+      var result = toSql(opts, function(xpr) {
+        return xpr.or('draft', xpr.and('user', 'role'));
+      })();
 
-  it('not locks', function() {
-    var result = toSql(opts, function(xpr) {
-      return xpr.not('user', 'role');
-    })();
+      assert.equal(_clean(result), 'draft or (user and role)');
+      done();
+    })
 
-    assert.equal(_clean(result), 'not user and not role');
-  })
-});
-
-describe('nested conditions', function() {
-
-  it('and nested in or', function() {
-    var result = toSql(opts, function(xpr) {
-      return xpr.or('draft', xpr.and('user', 'role'));
-    })();
-
-    assert.equal(_clean(result), 'draft or (user and role)');
-  })
-
+  });
 });
 
 function _clean(knex) {

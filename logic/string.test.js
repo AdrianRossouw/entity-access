@@ -1,3 +1,11 @@
+var Lab = require('lab')
+
+var lab = exports.lab = Lab.script()
+var describe = lab.describe
+var it = lab.it
+var before = lab.before;
+var after = lab.after;
+
 var assert = require('assert');
 var toString = require('./string');
 
@@ -7,40 +15,46 @@ var opts = {
   keychain: ['user=test-user']
 }
 
-describe('simple conditionals', function() {
-  it('and locks', function() {
-    var result = toString(opts, function(xpr) {
-      return xpr.and('user', 'role');
-    })();
+describe("acl.toString logic implementation", function() {
+  describe('simple conditionals', function() {
+    it('and locks', function(done) {
+      var result = toString(opts, function(xpr) {
+        return xpr.and('user', 'role');
+      })();
 
-    assert.equal(result, '(user and role)');
+      assert.equal(result, '(user and role)');
+      done();
+    });
+
+    it('or locks', function(done) {
+      var result = toString(opts, function(xpr) {
+        return xpr.or('user', 'role');
+      })();
+
+      assert.equal(result, '(user or role)');
+      done();
+    });
+
+    it('not locks', function(done) {
+      var result = toString(opts, function(xpr) {
+        return xpr.not('user', 'role');
+      })();
+
+      assert.equal(result, '(not user and not role)');
+      done();
+    });
   });
 
-  it('or locks', function() {
-    var result = toString(opts, function(xpr) {
-      return xpr.or('user', 'role');
-    })();
+  describe('nested conditions', function() {
 
-    assert.equal(result, '(user or role)');
+    it('and nested in or', function(done) {
+      var result = toString(opts, function(xpr) {
+        return xpr.or('draft', xpr.and('user', 'role'));
+      })();
+
+      assert.equal(result, '(draft or (user and role))');
+      done();
+    });
+
   });
-
-  it('not locks', function() {
-    var result = toString(opts, function(xpr) {
-      return xpr.not('user', 'role');
-    })();
-
-    assert.equal(result, '(not user and not role)');
-  });
-});
-
-describe('nested conditions', function() {
-
-  it('and nested in or', function() {
-    var result = toString(opts, function(xpr) {
-      return xpr.or('draft', xpr.and('user', 'role'));
-    })();
-
-    assert.equal(result, '(draft or (user and role))');
-  });
-
 });
