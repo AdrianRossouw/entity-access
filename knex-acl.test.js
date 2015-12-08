@@ -21,7 +21,7 @@ var _ = require('lodash');
 var fixture = require('./fixture')(db);
 var queries = require('./queries')(db);
 
-var libAcl = require('./acl')(db);
+var libAcl = require('./knex-acl')(db);
 
 var acl = libAcl(fixture.queries, fixture.acl, 'test_table', 'id');
 

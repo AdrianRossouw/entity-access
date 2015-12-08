@@ -2,7 +2,7 @@
   "name": "entity-access",
   "version": "0.1.0",
   "description": "content-level access control using knex",
-  "main": "entity-access.js",
+  "main": "knex-acl.js",
   "scripts": {
     "test": "./node_modules/.bin/lab -v *.test.js",
     "lint": "./node_modules/.bin/lab *.test.js -d"
