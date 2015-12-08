@@ -26,7 +26,7 @@ module.exports = function(db) {
     done(null, keys);
   }
 
-  function list(xpr) {
+  function conditions(xpr) {
     return xpr.or('owner', 'role');
   }
 
@@ -56,7 +56,7 @@ module.exports = function(db) {
   return {
     locks: locks,
     keychain: keychain,
-    list: list,
+    conditions: conditions,
     query:query
   }
 };
