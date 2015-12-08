@@ -8,8 +8,6 @@ module.exports = function(db) {
       locks = [];
       var matchQuery = fn({ and: and,  or: or, not: not });
 
-      var firstLock = locks.shift();
-
       // The first table needs to be selected, not joined.
       var firstLock = _.first(locks);
 
