@@ -31,7 +31,7 @@ SELECT * FROM entity
 * __acl__: object with functions providing the `locks`, `keychain` and `query`.
 * __locks__: each entity can declare one or more locks that need to be opened by one or more keys.
 * __keychain__: each user has one or keys with which to open locks.
-* __query__: The order and combination in which the locks need to open to provide access.
+* __conditions__: The order and combination in which the locks need to open to provide access.
 
 ## Example
 
@@ -50,7 +50,7 @@ tries not to make any assumptions by instead letting you implement the parts
 that are almost always different between each project.
 
 You enable the ACL on an entity by providing it with the knex functions required by the [seneca-knex-store](https://github.com/AdrianRossouw/seneca-knex-store),
-and an object that contains implementations of the `locks`, `keychain` and `query` functions for your acl.
+and an object that contains implementations of the `locks`, `keychain` and `conditions` functions for your acl.
 
 ```javascript
 var Acl = require('node/acl');
@@ -156,51 +156,23 @@ function keychain(user, done) {
 }
 ```
 
-## Query
+## Conditions
 
 This is the most complicated of the functions, because it's also the most flexible.
 
 Whereas many solutions (such as unix file perms) can be solved with 'ANY' or 'ALL'
 locks opened, there are many real world cases where this is not flexible enough.
-By having the developer write the query directly, they are able to mix and match
+By having the developer write the logic directly, they are able to mix and match
 the conditions to exactly match their use-case.
 
-How it works is that when you do a select (like `select * from files`), this query
-will be added in a subselect to filter out the keys.
+How it works is that when you do a select (like `select * from files`), this logic will
+be used to generate a query that will be added in a subselect to filter out the keys.
 
 ie: `select * from files where id in (/* this query */)`.
 
 
 ```javascript
-function(opts, done) {
-	// select owner locks
-	var knex = db('acl as owner');
-		.select('owner.entity_id');
-		.where('owner.entity', opts.entity);
-		.where('owner.lock', 'owner');
-		.where('owner.'+ opts.access, true);
-
-	// join with groups locks.
-	knex.leftJoin('acl as groups', 'groups.entity_id', 'owner.entity_id')
-		.where('groups.entity', opts.entity);
-		.where('groups.lock', 'groups');
-		.where('groups.'+ opts.access, true);
-
-	// join with others locks.
-	knex.leftJoin('acl as others', 'others.entity_id', 'owner.entity_id');
-		.where('others.entity', opts.entity);
-		.where('others.lock', 'others');
-		.where('others.'+ opts.access, true);
-
-	// a user needs to have the keys to unlock ANY of these locks. 
-	knex.where(function() {
-		var knex = this;
-
-		knex.whereIn('owner.key', opts.keychain);
-		knex.orWhereIn('groups.key', opts.keychain);
-		knex.orWhereIn('others.key', opts.keychain);
-	});
-
-	done(null, knex);
+function(xpr) {
+  return xpr.or('owner', 'group', 'other');
 }
 ```

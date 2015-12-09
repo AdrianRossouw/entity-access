@@ -29,7 +29,6 @@ module.exports = function(knex) {
         .where(q);
     },
     setup: function(done) {
-
       knex.schema.hasTable('test_table').then(function(exists) {
         if (exists) { return done(); }
 

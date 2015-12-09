@@ -6,138 +6,39 @@ var it = lab.it
 var before = lab.before;
 var after = lab.after;
 
-var assert = require('assert');
-
-var sqlfile = require('tmp').tmpNameSync();
-
-var db = require('knex')({
-  client: 'sqlite',
-   connection: {
-     filename: sqlfile
-   }
-});
-
 var _ = require('lodash');
-var fixture = require('./fixture')(db);
-var queries = require('./queries')(db);
+var assert = require('assert');
+var ACL = require('./acl');
 
-var libAcl = require('./acl')(db);
-
-var acl = libAcl(fixture.queries, fixture.acl, 'test_table', 'id');
-
-var userData = {
-  show: {  id: '1', roles: ['editor', 'view_content'] },
-  hide: {  id: '1', roles: ['editor'] }
-};
-
-var entityData = {
-  show: {
-    id: 'show-entity',
-    name: 'test fixture',
-    owner: '1'
+var fixture = {
+  locks: function(ent, done) {
+    done(null, [{ lock: 'user', key: 'user=1', read: true }]);
   },
-  hide: {
-    id: 'hide-entity',
-    name: 'another test fixture',
-    owner: '2'
+  keychain: function(user, done) {
+    done(null, ['user=1']);
+  },
+  conditions: function(xpr) {
+    return xpr.and('user');
   }
 };
 
-describe('acl query tests', function() {
-  before(queries.setup);
-  before(fixture.queries.setup);
-  after(fixture.queries.breakdown);
+var acl = ACL(fixture, 'test', 'id');
 
-  describe('ace generation', function() {
-    after(function(done) { queries.remove().asCallback(done); });
-    after(function(done) { fixture.queries.remove().asCallback(done); });
-
-    var opts = {
-      ent: entityData.show,
-      user$: userData.show
-    };
-
-    it('insert a record', function(done) {
-      acl.insert(opts)
-        .then(function() { return queries.list(); })
-        .then(function(rows) {
-          var any = _.partial(_.any, rows);
-
-          assert.equal(rows.length, 2);
-
-          assert.ok(any({
-            lock: 'role',
-            key: 'role=view_content',
-            read: 1 
-          }));
-
-          assert.ok(any({
-            lock: 'owner',
-            key: 'user=1',
-            read: 1,
-            write: 1
-          }), 'has owner lock');
-
-          done();
-        });
+describe('ACL api', function() {
+  var include;
+  before(function(done) {
+    acl.locks({ id: 1 }, function(err, keys) {
+      assert.equal(keys.length, 1);
+      include = _.partial(_.find, keys);
+      done();
     });
-
-    it('update a record', function(done) {
-      var ent = _.extend({}, opts.ent, {
-        name: 'updated test fixture',
-        owner: '2'
-      });
-
-      acl.update({ user$: userData.show, ent: ent })
-        .then(function() { return queries.list(); })
-        .then(function(rows) {
-          var any = _.partial(_.any, rows);
-
-          assert.equal(rows.length, 2);
-
-          assert.ok(any({
-            lock: 'owner',
-            key: 'user=2',
-            read: 1,
-            write: 1
-          }), 'has different owner lock');
-
-          done();
-        });
-
-      });
-
   });
 
-  describe('filters query output', function() {
-    before(function(done) {
-      acl.insert({ ent: entityData.show })
-        .then(function() {
-          return acl.insert({ ent: entityData.hide });
-        })
-        .asCallback(done);
-    });
-
-    after(function(done) { queries.remove().asCallback(done); });
-    after(function(done) { fixture.queries.remove().asCallback(done); });
-
-    it('should hide inaccessible records', function(done) {
-
-      acl.list({ user$: userData.hide })
-        .then(function(rows) {
-          var any = _.partial(_.any, rows);
-
-          assert.equal(rows.length, 1);
-
-          // must show the show record
-          assert.ok(any(entityData.show));
-
-          // must not show the hide record
-          assert.ok(!any(entityData.hide));
-
-          done();
-        });
-    });
-
+  it('expands locks as needed', function(done) {
+    assert.ok(include({ entityId: 1 }), 'added entityId');
+    assert.ok(include({ write: false }), 'default write to false');
+    assert.ok(include({ remove: false }), 'default remove to false');
+    assert.ok(include({ entity: 'test' }), 'default entity type');
+    done();
   });
 });
