@@ -2,6 +2,8 @@ var _ = require('lodash');
 var assert = require('assert');
 var util = require('util');
 var events = require('events');
+var toString = require('./logic/string');
+var toJSON = require('./logic/json');
 
 module.exports = function(acl, entity, key) {
   assert.ok(entity, 'entity required');
@@ -28,6 +30,12 @@ module.exports = function(acl, entity, key) {
           });
         }
       });
+    },
+    toString: function() {
+      return toString({}, acl.conditions)();
+    },
+    toJSON: function() {
+      return toJSON({}, acl.conditions)();
     }
   });
 
