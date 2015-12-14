@@ -14,7 +14,6 @@ module.exports = function(acl, entity, key) {
   var opts = { entity: entity, key: key, acl: Acl };
 
   _.extend(Acl, acl, {
-    parent: acl,
     locks: function(ent, done) {
 
       acl.locks(ent, function(err, locks) {
@@ -44,7 +43,7 @@ module.exports = function(acl, entity, key) {
       return toJSON(opts, acl.conditions)();
     },
     access: function(user, ent, action, done) {
-      toFn(opts, acl.conditions)(user, ent, action, done);
+      return toFn(opts, acl.conditions)(user, ent, action, done);
     },
     filter: function(user, ent, action, done) {
         
