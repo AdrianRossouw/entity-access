@@ -44,8 +44,8 @@ describe('acl.toFn logic implementation', function() {
       it('succeeds when all match', function(done) {
         var user = { id: 1, role: 'editor' };
 
-        testFn(user, ent, 'read', function(err, result) {
-          assert.ok(result);
+        testFn(user, ent, 'read', function(err) {
+          assert.ok(!err);
           done();
         });
       });
@@ -53,8 +53,8 @@ describe('acl.toFn logic implementation', function() {
       it('fails when any do not match', function(done) {
         var user = { id: 1, role: 'not-editor' };
 
-        testFn(user, ent, 'read', function(err, result) {
-          assert.ok(!result);
+        testFn(user, ent, 'read', function(err) {
+          assert.ok(err);
           done();
         });
       });
@@ -62,8 +62,8 @@ describe('acl.toFn logic implementation', function() {
       it('fails when all do not match', function(done) {
         var user = { id: 2, role: 'not-editor' };
 
-        testFn(user, ent, 'read', function(err, result) {
-          assert.ok(!result);
+        testFn(user, ent, 'read', function(err) {
+          assert.ok(err);
           done();
         });
       });
@@ -77,8 +77,8 @@ describe('acl.toFn logic implementation', function() {
       it('succeeds when all match', function(done) {
         var user = { id: 1, role: 'editor' };
 
-        testFn(user, ent, 'read', function(err, result) {
-          assert.ok(result);
+        testFn(user, ent, 'read', function(err) {
+          assert.ok(!err);
           done();
         });
       });
@@ -86,8 +86,8 @@ describe('acl.toFn logic implementation', function() {
       it('succeeds when any match', function(done) {
         var user = { id: 1, role: 'not-editor' };
 
-        testFn(user, ent, 'read', function(err, result) {
-          assert.ok(result);
+        testFn(user, ent, 'read', function(err) {
+          assert.ok(!err);
           done();
         });
       });
@@ -95,8 +95,8 @@ describe('acl.toFn logic implementation', function() {
       it('fails when any do not match', function(done) {
         var user = { id: 2, role: 'not-editor' };
 
-        testFn(user, ent, 'read', function(err, result) {
-          assert.ok(!result);
+        testFn(user, ent, 'read', function(err) {
+          assert.ok(err);
           done();
         });
       });
@@ -110,8 +110,8 @@ describe('acl.toFn logic implementation', function() {
       it('fails when match', function(done) {
         var user = { id: 1, role: 'editor' };
 
-        testFn(user, ent, 'read', function(err, result) {
-          assert.ok(!result);
+        testFn(user, ent, 'read', function(err) {
+          assert.ok(err);
           done();
         });
       });
@@ -119,8 +119,8 @@ describe('acl.toFn logic implementation', function() {
       it('succeeds when not match', function(done) {
         var user = { id: 2, role: 'not-editor' };
 
-        testFn(user, ent, 'read', function(err, result) {
-          assert.ok(result);
+        testFn(user, ent, 'read', function(err) {
+          assert.ok(!err);
           done();
         });
       });
@@ -145,8 +145,8 @@ describe('acl.toFn logic implementation', function() {
 
       var user = { id: 2, role: 'not-editor' };
 
-      testFn(user, ent, 'read', function(err, result) {
-        assert.ok(result);
+      testFn(user, ent, 'read', function(err) {
+        assert.ok(!err);
         done();
       });
     });

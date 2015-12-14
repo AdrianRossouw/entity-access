@@ -47,7 +47,7 @@ module.exports = function(acl, entity, key) {
       toFn(opts, acl.conditions)(user, ent, action, done);
     },
     filter: function(user, ent, action, done) {
-
+        
     }
   });
 

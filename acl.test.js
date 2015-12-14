@@ -18,7 +18,7 @@ var fixture = {
     ]);
   },
   keychain: function(user, done) {
-    done(null, ['user=1', 'role=admin']);
+    done(null, ['user='+user.id, 'role='+user.role]);
   },
   conditions: function(xpr) {
     return xpr.and('user', 'role');
@@ -55,12 +55,17 @@ describe('ACL api', function() {
     assert.deepEqual(acl.toJSON(), ['AND', 'user', 'role']);
     done();
   });
-  it('has an access function', function(done) {
-    acl.access({ id: 1 }, { id: 1 }, 'read', function(err) {
-      if (err) { return done(err); }
+  it('access check success', function(done) {
+    acl.access({ id: 1, role: 'admin' }, { id: 1 }, 'read', function(err) {
+      assert.ok(!err);
+      done();
+    });
+  });
 
-      // the user can access this
-      return done();
+  it('access check failure', function(done) {
+    acl.access({ id: 2, role: 'user' }, { id: 1 }, 'read', function(err) {
+      assert.ok(err);
+      done();
     });
   });
 });

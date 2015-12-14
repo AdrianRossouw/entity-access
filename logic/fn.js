@@ -6,7 +6,12 @@ module.exports = function(opts, fn) {
   return function access(user, ent, access, done) {
     acl.locks(ent, function(err, locks) {
       acl.keychain(user, function(err, keys) {
-        done(null, fn(logic(locks, keys, access))());
+
+        if (fn(logic(locks, keys, access))()) {
+          return done();
+        } else {
+          done("validation failed");
+        }
       });
     });
   }
