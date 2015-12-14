@@ -55,4 +55,12 @@ describe('ACL api', function() {
     assert.deepEqual(acl.toJSON(), ['AND', 'user', 'role']);
     done();
   });
+  it('has an access function', function(done) {
+    acl.access({ id: 1 }, { id: 1 }, 'read', function(err) {
+      if (err) { return done(err); }
+
+      // the user can access this
+      return done();
+    });
+  });
 });
