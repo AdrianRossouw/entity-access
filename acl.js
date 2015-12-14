@@ -34,7 +34,6 @@ module.exports = function(acl, entity, key) {
           });
         }
       });
-
     },
     toString: function() {
       return toString(opts, acl.conditions)();

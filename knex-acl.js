@@ -80,7 +80,9 @@ module.exports = function (db) {
       update: function (opts) {
         return queries.update(opts).then(regenerateLocks(opts));
       },
-      acl: _acl
+      acl: (queries.acl || []).concat([
+        { entity: entity, key: key, acl: _acl }
+      ])
     });
   };
 };
