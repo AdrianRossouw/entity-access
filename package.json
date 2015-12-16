@@ -1,6 +1,6 @@
 {
   "name": "entity-access",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "content-level access control using knex",
   "main": "knex-acl.js",
   "scripts": {
