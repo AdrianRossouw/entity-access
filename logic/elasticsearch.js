@@ -1,9 +1,7 @@
-module.exports = function (db) {
+module.exports = function () {
 	return function (opts, fn) {
-		var locks = [];
 
 		return function () {
-			locks = [];
 			var matchQuery = fn({ and: and, or: or, not: not });
 
 			// TODO...
@@ -11,8 +9,6 @@ module.exports = function (db) {
 
 		function and () {
 			var args = arguments;
-
-			_trackLocks(args);
 
 			return function () {
 				var must = [];
@@ -38,8 +34,6 @@ module.exports = function (db) {
 
 		function or () {
 			var args = arguments;
-
-			_trackLocks(args);
 
 			return function () {
 				var shoulds = [];
@@ -71,8 +65,6 @@ module.exports = function (db) {
 		function not () {
 			var args = arguments;
 
-			_trackLocks(args);
-
 			return function () {
 				var must_not = [];
 				_.each(args, function (cnd) {
@@ -98,14 +90,6 @@ module.exports = function (db) {
 					}
 				});
 			};
-		}
-
-		function _trackLocks (args) {
-			_.each(args, function (cnd) {
-				if (_.isString(cnd) && !~locks.indexOf(cnd)) {
-					locks.push(cnd);
-				}
-			});
 		}
 	};
 };
