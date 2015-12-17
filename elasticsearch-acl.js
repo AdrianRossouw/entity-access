@@ -3,7 +3,8 @@ var ACL = require('./acl');
 var assert = require('assert');
 var Promise = require('bluebird');
 
-module.exports = function (db) {
+module.exports = function (db, esClient, esIndex) {
+	var q = require('./queries')(db);
 	var toElasticSearch = require('./logic/elasticsearch')();
 
 	return function (queries, acl, entity, key) {
@@ -47,11 +48,43 @@ module.exports = function (db) {
 				});
 		}
 
+		function indexLocks (opts) {
+			var entityId = _.get(opts, 'ent.id');
+
+			return function (rows) {
+				if (key !== 'id') { return rows; }
+
+				q
+					.list({
+						entity_id: recordId
+					})
+					.then(function (locks) {
+						var bulk = [];
+						_.each(locks, function (lock) {
+							bulk.push({ index: { _index: esIndex, _type: 'acl', _id: lock.id }});
+							bulk.push(lock);
+						});
+						esClient.bulk({
+							body: bulk
+						}, function (err) {
+							if (err) throw err;
+						});
+					});
+				return rows;
+			};
+		}
+
 		// TODO: Handle ACL records to ES with direct plugin
 
 		return _.extend({}, queries, {
 			search: function (args, done) {
 				done(null, setPermissions(args.search.query, 'read'));
+			},
+			insert: function (opts) {
+				queries.insert(opts).then(indexLocks(opts));
+			},
+			update: function (opts) {
+				queries.update(opts).then(indexLocks(opts));
 			},
 			acl: (queries.acl || []).concat([
 				{ entity: entity, key: key, acl: _acl }
