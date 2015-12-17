@@ -12,32 +12,32 @@ module.exports = function (db) {
 
 		var _acl = ACL(acl, entity, key);
 
-		_acl.query = function (opts, done) {
+		_acl.search = function (opts, done) {
 			done(null, toElasticSearch(opts, _acl.conditions)());
 		};
 
 		var promised = {
 			locks: Promise.promisfy(_acl.locks),
 			keychain: Promise.promisfy(_acl.keychain),
-			query: Promise.promisfy(_acl.query)
+			search: Promise.promisfy(_acl.search)
 		};
 
-		function setPermissions (query, access) {
+		function setPermissions (query) {
 			// checking context here to determine if we need to add ACLs
 			if (!opts || !opts.user$) { return query; }
 
-			promised.keychain(opts.user$)
+			return promised.keychain(opts.user$)
 				.then(function (keychain) {
 					return {
 						keychain: keychain,
-						access: access,
+						access: 'read',
 						entity: entity,
 						key: key
 					};
 				})
-				.then(promised.query)
+				.then(promised.search)
 				.then(function (filters) {
-					filters.must.push({
+					query.filtered.must.push({
 						bool: {
 							must: filters.and,
 							should: filters.or,
@@ -47,16 +47,15 @@ module.exports = function (db) {
 				});
 		}
 
-		return {
-			search: function (args, callback) {
-				if (_.has(args, 'search.query.filtered')) {
-					setPermissions(args.search.query, 'read');
-				}
-				return this.prior(args, callback);
+		// TODO: Handle ACL records to ES with direct plugin
+
+		return _.extend({}, queries, {
+			search: function (args, done) {
+				done(null, setPermissions(args.search.query, 'read'));
 			},
 			acl: (queries.acl || []).concat([
 				{ entity: entity, key: key, acl: _acl }
 			])
-		};
+		});
 	};
 };
