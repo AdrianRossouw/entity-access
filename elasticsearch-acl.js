@@ -23,7 +23,8 @@ module.exports = function (db, esClient, esIndex) {
 			search: Promise.promisfy(_acl.search)
 		};
 
-		function setPermissions (query) {
+		function setPermissions (opts) {
+			var query = opts.search.query;
 			// checking context here to determine if we need to add ACLs
 			if (!opts || !opts.user$) { return query; }
 
@@ -56,7 +57,7 @@ module.exports = function (db, esClient, esIndex) {
 
 				q
 					.list({
-						entity_id: recordId
+						entity_id: entityId
 					})
 					.then(function (locks) {
 						var bulk = [];
