@@ -19,17 +19,17 @@ module.exports = function(opts, fn) {
   function logic(locks, keys, access) {
 
     function and() {
-      return _.partial(_.all, arguments, _matchFn);
+      return _.partial(_.every, arguments, _matchFn);
     }
 
     function or() {
-      return _.partial(_.any, arguments, _matchFn);
+      return _.partial(_.some, arguments, _matchFn);
     }
 
     function not() {
       var args = arguments;
       return function() {
-        return !_.all(args, _matchFn);
+        return !_.every(args, _matchFn);
       };
     }
 
@@ -41,7 +41,7 @@ module.exports = function(opts, fn) {
       var match = { entity: opts.entity, lock: cnd };
       match[access] = true;
 
-      var _locks = _(locks).filter(match).pluck('key').value();
+      var _locks = _(locks).filter(match).map('key').value();
 
       return !!_.intersection(_locks, keys).length;
     }

@@ -61,7 +61,7 @@ describe('acl knex integration', function() {
       acl.insert(opts)
         .then(function() { return queries.list(); })
         .then(function(rows) {
-          var any = _.partial(_.any, rows);
+          var any = _.partial(_.some, rows);
 
           assert.equal(rows.length, 2);
 
@@ -91,7 +91,7 @@ describe('acl knex integration', function() {
       acl.update({ user$: userData.show, ent: ent })
         .then(function() { return queries.list(); })
         .then(function(rows) {
-          var any = _.partial(_.any, rows);
+          var any = _.partial(_.some, rows);
 
           assert.equal(rows.length, 2);
 
@@ -125,7 +125,7 @@ describe('acl knex integration', function() {
 
       acl.list({ user$: userData.hide })
         .then(function(rows) {
-          var any = _.partial(_.any, rows);
+          var any = _.partial(_.some, rows);
 
           assert.equal(rows.length, 1);
 

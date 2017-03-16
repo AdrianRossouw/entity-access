@@ -19,7 +19,7 @@ module.exports = function(db) {
     var keys = [];
     keys.push('user='+user.id);
 
-    if (_.include(user.roles, 'view_content')) {
+    if (_.includes(user.roles, 'view_content')) {
       keys.push('role=view_content');
     }
 
