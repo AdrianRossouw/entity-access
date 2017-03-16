@@ -30,33 +30,9 @@ module.exports = function(db) {
     return xpr.or('owner', 'role');
   }
 
-  function query(opts, done) {
-    var knex = db('acl as owner')
-      .select('owner.entity_id');
-
-    knex.where('owner.entity', opts.entity)
-      .where('owner.lock', 'owner')
-      .where('owner.'+ opts.access, true);
-
-    knex.leftJoin('acl as role', 'role.entity_id', 'owner.entity_id')
-      .where('role.entity', opts.entity)
-      .where('role.lock', 'role')
-      .where('role.'+ opts.access, true);
-
-    knex.where(function() {
-      var knex = this;
-
-      knex.whereIn('owner.key', opts.keychain);
-      knex.orWhereIn('role.key', opts.keychain);
-    });
-
-    done(null, knex);
-  }
-
   return {
     locks: locks,
     keychain: keychain,
-    conditions: conditions,
-    query:query
+    conditions: conditions
   }
 };
