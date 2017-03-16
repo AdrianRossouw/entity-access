@@ -4,8 +4,7 @@
   "description": "content-level access control using knex",
   "main": "knex-acl.js",
   "scripts": {
-    "test": "./node_modules/.bin/lab -v *.test.js logic/*.test.js",
-    "lint": "./node_modules/.bin/lab *.test.js -d"
+    "test": "./node_modules/.bin/mocha -v *.test.js logic/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -25,10 +24,7 @@
     "uuid": "^3.0.1"
   },
   "devDependencies": {
-    "eslint-config-seneca": "1.x.x",
-    "eslint-plugin-hapi": "2.x.x",
-    "eslint-plugin-standard": "1.x.x",
-    "lab": "6.x.x",
+    "mocha": "^3.2.0",
     "node-uuid": "^1.4.7",
     "sqlite3": "^3.1.0",
     "tmp": "0.0.28",
